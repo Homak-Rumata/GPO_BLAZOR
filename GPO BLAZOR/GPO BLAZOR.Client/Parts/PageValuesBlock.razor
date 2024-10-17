@@ -1,11 +1,12 @@
 ﻿@using GPO_BLAZOR.Client.Class.Date
 
+
 <body>
     @if(Date != null) {
         <h2>
-            @Date.NamePageBlock
+            @Date.PageName
         </h2>
-        @foreach (IBlockValues temp in Date.TextValues)
+        @foreach (IBlock temp in Date.Date)
         {
             <Block Date="temp" />
         }
@@ -18,7 +19,7 @@
 
 @code {
     [Parameter]
-    public IPageValues Date { get; set; }
+    public IPage Date { get; set; }
 
     
 }

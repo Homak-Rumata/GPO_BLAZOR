@@ -2,6 +2,7 @@
 @using GPO_BLAZOR.Client.Parts
 @using GPO_BLAZOR.Client.Class.JSRunTimeAccess;
 
+
 @inherits LayoutComponentBase
 
 <link href="GPO_BLAZOR.styles.css" rel="stylesheet" type="text/css">
@@ -42,7 +43,7 @@
     async Task AuthorizationSuccesed(IAuthorizationDate AuthorizationDate)
     {
 
-        //_authorizationDate = AuthorizationDate;
+        _authorizationDate = AuthorizationDate;
     }
 
     protected override void OnInitialized()

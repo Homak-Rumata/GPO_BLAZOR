@@ -1,31 +1,16 @@
-﻿namespace GPO_BLAZOR.Client.Class.Field
+﻿using GPO_BLAZOR.Client.Class.Date;
+using Microsoft.AspNetCore.Components;
+
+namespace GPO_BLAZOR.Client.Class.Field
 {
-    public partial class Field<T> : Date.Field, Date.ITextField<T>
+    public partial class Field
     {
+        [Parameter]
+        public IField Date { get; set; }
 
-
-        public override string GetValue()
+        protected override Task OnAfterRenderAsync(bool firstRender)
         {
-            return $"\"{idvalue.ToString()}\": \"{value.ToString()}\"";
-        }
-        public void setValue(T info)
-        {
-            value = info;
-        }
-
-        delegate string ValueDelegate();
-
-        private ValueDelegate GetValueDelegate;
-
-        void SetDelegate(ValueDelegate value)
-        {
-            GetValueDelegate = value;
-        }
-
-        public override void SetDelegate(Func<string> SetedDelegate)
-        {
-            ValueDelegate temp = () => (SetedDelegate());
-            SetDelegate(temp);
+            return base.OnAfterRenderAsync(firstRender);
         }
     }
 }

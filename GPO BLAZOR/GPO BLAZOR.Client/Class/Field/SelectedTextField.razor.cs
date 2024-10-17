@@ -1,18 +1,21 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using GPO_BLAZOR.Client.Class.Date;
+using Microsoft.AspNetCore.Components;
 
 namespace GPO_BLAZOR.Client.Class.Field
 {
-    public partial class SelectedTextField: Date.Field
+    public partial class SelectedTextField: Field
     {
 
-        [Parameter]
-        public Date.ICollectionValue<string> field { get; set; }
+        private bool IsLoading;
+
+        private CollectionValues collection;
 
         protected override async Task OnInitializedAsync()
         {
+            IsLoading = false;
             try
             {
-                field.CollectionValues = (await GetCollectionValues(field.namevalue)).ToList();
+                collection = (Date is not null)?await CollectionValues.Create(Date.Id):collection;
             }
             finally
             {
@@ -20,46 +23,29 @@ namespace GPO_BLAZOR.Client.Class.Field
             }
         }
 
-        public override string GetValue ()
-        {
-            return $"\"{idvalue.ToString()}\": \"{value.ToString()}\"";
-        }
-
-        private async static Task<IEnumerable<string>> GetCollectionValues(string Field)
+        protected override async Task OnParametersSetAsync()
         {
             try
             {
-                HttpClient httpclient = new HttpClient();
-                Uri uri = new Uri($"http://{Date.IPaddress.IPAddress}/GetAtributes/{Field}");
-                httpclient.BaseAddress = uri;
-                var request = await httpclient.GetAsync(httpclient.BaseAddress);
-                if (request.IsSuccessStatusCode && (request.StatusCode == System.Net.HttpStatusCode.OK))
-                {
-                    try
-                    {
-                        string result = await request.Content.ReadAsStringAsync();
-                        var c = result.Split(",\n");
-                        return c;
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"{Field}: {request.StatusCode.ToString()} -> {ex}");
-                        return null;
-                    }
-                }
-                else
-                {
-                    return new List<string>();
-                }
+                
+                collection = await CollectionValues.Create(Date.Id);
+                
+
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
-                Console.WriteLine($"{Field} -> {ex}");
-                return null;
+                Console.WriteLine($"SelectedTextFieldException -> {ex.Message}");
+            }
+            finally
+            {
+                base.OnParametersSetAsync();
             }
         }
-        
 
-
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            IsLoading = true;
+            base.OnAfterRenderAsync(firstRender);
+        }
     }
 }

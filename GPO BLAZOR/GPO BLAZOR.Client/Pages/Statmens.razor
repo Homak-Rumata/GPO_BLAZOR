@@ -1,5 +1,6 @@
 ﻿@using GPO_BLAZOR.Client.Parts
 @using GPO_BLAZOR.Client.Class.Date
+@using GPO_BLAZOR.Client.Class.JSRunTimeAccess;
 @using Microsoft.AspNetCore.Components.Routing
 @using Microsoft.AspNetCore.Components.Web
 @inject NavigationManager Navigation
@@ -8,8 +9,11 @@
 
 @page "/"
 <div>
-<PageTitle>Таблица заявлений</PageTitle>
-
+    @if (NewPostMenuViem)
+    {
+        <SelectStateTemplates />
+    }
+    <PageTitle>Таблица заявлений</PageTitle>
 <table>
     <thead>
         <tr>
@@ -32,7 +36,7 @@
         {
             @if (Date != null)
             {
-                @foreach (StatmentDate temp in Date)
+                @foreach (IStatmenTableLineModel temp in Date.Lines)
                 {
                     <Label Date="temp" ViemStatmen="Click"/>
                 }
@@ -61,6 +65,6 @@
 </table>
 </div>
 
-<input type="button" value="Создать" @onclick="NewPost"/>
+<input type="button" value="Создать" @onclick="NewPost" style="background-color:@InterfaceColor.TusurColor"/>
 
 

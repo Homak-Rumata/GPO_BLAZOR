@@ -15,11 +15,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="Class\Field\TymeField.razor.css" />
     <None Remove="Pages\Statmens.razor.css" />
     <None Remove="Parts\Block.razor.css" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Class\Field\TymeField.razor.css" />
     <Content Include="Pages\Statmens.razor.css" />
     <Content Include="Parts\Block.razor.css" />
   </ItemGroup>
@@ -28,6 +30,14 @@
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Authentication" Version="8.0.3" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <UpToDateCheckInput Remove="Class\Field\TymeField.razor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Class\Field\TymeField.razor" />
   </ItemGroup>
 
 </Project>
