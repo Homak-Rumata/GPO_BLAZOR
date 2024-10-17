@@ -3,23 +3,26 @@
 
 <body>
     <h3>
-        @Date.NameBlock
+        @Date.BlockName
     </h3>
     
     <div>
-    @foreach (IField temp in Date.TextValues)
+    @foreach (IField temp in Date.Date)
     {
-            switch (temp)
+            switch (temp.ClassType)
             {
-                case CollectionValue<string> textvalue:
-                    <SelectedTextField field="(ICollectionValue<string>)temp" />
+                case "CollectionInformationField":
+                    <SelectedTextField Date="temp" />
                     break;
-                case TextValue<string> textvalue:
-                    <TextField field="(ITextField<string>)temp" />
+                case "InputInformationField":
+                    <TextField Date="temp" />
+                    break;
+                case "TymeInformationField":
+                    <TymeField Date="temp" />
                     break;
                 default:
                     <h1> ComponentError </h1>
-                    <TextField field="(ITextField<string>)temp" />
+                    <TextField Date="temp" />
                     break;
             }
             
@@ -30,7 +33,7 @@
 
 @code {
     [Parameter]
-    public IBlockValues Date { get; set; }
+    public IBlock Date { get; set; }
 
     protected override void OnInitialized()
     {

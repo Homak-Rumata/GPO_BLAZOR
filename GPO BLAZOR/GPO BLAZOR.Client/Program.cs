@@ -14,7 +14,10 @@ namespace GPO_BLAZOR.Client
             builder.Services.AddScoped<CookieStorageAccessor>();
             builder.Services.AddScoped<LocalStorageAccessor>();
 
-            await builder.Build().RunAsync();
+
+            var app = builder.Build();
+
+            await app.RunAsync();
         }
     }
 

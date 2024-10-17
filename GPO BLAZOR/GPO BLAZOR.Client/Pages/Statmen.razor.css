@@ -65,7 +65,6 @@ input {
         border: none;
         width: 150px;
         height: 40px;
-        background-color: var(--button-color);
         display: inline-block;
         color: white;
         font-size: large;

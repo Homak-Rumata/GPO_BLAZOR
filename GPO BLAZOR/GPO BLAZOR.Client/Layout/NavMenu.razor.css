@@ -1,7 +1,6 @@
 div {
     margin: 0px;
     padding: 0px;
-    background-color: var(--button-color);
     height: 40px;
     width: 100%;
 }
@@ -13,7 +12,6 @@ button {
     border: none;
     width: 150px;
     height: 40px;
-    background-color: #3c388d;
     display: inline-block;
     color: white;
     font-size: large;

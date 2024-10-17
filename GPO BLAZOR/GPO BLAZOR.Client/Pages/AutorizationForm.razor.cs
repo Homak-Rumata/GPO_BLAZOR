@@ -17,30 +17,22 @@ namespace GPO_BLAZOR.Client.Pages
         [Parameter]
         public EventCallback<IAuthorizationDate> AuthorizationInterfaceChanged { get; set; }
 
-        IJSRuntime runtime;
-
         private string message = null;
         private bool isLoading { get; set; } = true;
 
         async Task ButtonClicked()
         {
-            
 
-            if (AuthorizationInterface.IsCookies)
+            Console.WriteLine("Callback0: "+ AuthorizationInterface.IsCookies+ AuthorizationInterface.GetHashCode());
+            try
             {
-                try
-                {
-
-                    await AuthorizationInterfaceChanged.InvokeAsync(AuthorizationInterface);
-                }
-                catch
-                {
-
-                }
+                await AuthorizationInterface.GetValues(ReadCookies);
+                await AuthorizationInterfaceChanged.InvokeAsync(AuthorizationInterface);
             }
-            else
+            catch (Exception ex)
             {
-
+                Console.WriteLine(ex.Message);
+                //await Checer();
                 message = "Неверное имя пользователя или пароль";
             }
 
@@ -53,20 +45,18 @@ namespace GPO_BLAZOR.Client.Pages
             isLoading = false;
         }
 
-        protected override async Task OnParametersSetAsync()
-        {
-
-        }
 
 
 
         protected override async Task OnInitializedAsync()
         {
             isLoading = true;
-            AuthorizationInterface._writer = WriteCookies;
-            AuthorizationInterface._reader = ReadCookies;
+
+            
             try
             {
+                if (AuthorizationInterface._writer == null)
+                    AuthorizationInterface = new AuthorizationDate(ReadCookies, WriteCookies);
                 await AuthorizationInterface.GetValues(ReadCookies);
                 await AuthorizationInterfaceChanged.InvokeAsync(AuthorizationInterface);
             }
@@ -79,10 +69,14 @@ namespace GPO_BLAZOR.Client.Pages
             {
             }
 
-
-
         }
 
+        protected override void OnParametersSet()
+        {
+            base.OnParametersSet();
+            if (AuthorizationInterface._writer==null)
+            AuthorizationInterface = new AuthorizationDate(ReadCookies, WriteCookies);
+        }
 
 
         protected async Task Checer()
@@ -120,19 +114,5 @@ namespace GPO_BLAZOR.Client.Pages
             }
         }
 
-        async Task PostR()
-        {
-            HttpClient httpClient = new HttpClient();
-            httpClient.BaseAddress = new Uri("https://localhost:3001/userinfo");
-            var temp = new { lol = "kek" };
-            JsonContent cx = JsonContent.Create(temp);
-            using var response3 = await httpClient.PostAsync(httpClient.BaseAddress, cx);
-
-            StringContent ghd = new StringContent("{\"field1\":\"111\", \"field2\":\"112\"}");
-            ghd.Headers.Add("SecreteCode", ["Anuthing", "DoubleValue"]);
-            /*--------*/
-            await httpClient.PostAsync(httpClient.BaseAddress, ghd);
-            Console.WriteLine(ghd.ReadAsStringAsync().Result);
-        }
     }
 }

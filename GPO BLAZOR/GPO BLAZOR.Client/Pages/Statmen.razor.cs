@@ -1,4 +1,5 @@
-﻿using GPO_BLAZOR.Client.Class.Date;
+﻿using System.Data;
+using GPO_BLAZOR.Client.Class.Date;
 using Microsoft.AspNetCore.Components;
 
 
@@ -6,45 +7,42 @@ namespace GPO_BLAZOR.Client.Pages
 {
     public partial class Statmen
     {
-        private bool isLoading;
-
         [Parameter]
-        public IStatmenValue Date { get; set; }
+        public IStatmen? Date { get; set; }
 
         [Parameter]
         public int Number { get; set; }
 
-        private IStatmentDate CurrentObject { get; set; }
-
         [Parameter]
-        public EventCallback Return { get; set; } 
+        public EventCallback Return { get; set; }
 
-        private IPageValues _tempPage;
+        private bool isLoading;
 
+        private IPage SelectedPage;
+
+        protected async Task ChangeValue(IPage selectPage)
+        {
+            SelectedPage = selectPage;
+
+        }
         private async Task SetDate()
         {
-            string setdate = Date.GetValue();
-            Console.WriteLine(setdate);
 
-            Console.WriteLine("Send 1");
             try
             {
-                FieldsConstractor.SetBlockDate(Date, Int32.Parse(CurrentObject.ID));
-                Console.WriteLine("send 2");
+                Console.WriteLine($"SendDateMessage -> {await Date.SendDate()}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine($"SendDateViemException -> {ex.Message}");
             }
-
-            Navigation.NavigateTo("/");
-            if (Return.HasDelegate)
-            await Return.InvokeAsync();
-            else
+            finally
             {
-
+                Navigation.NavigateTo("/");
+                if (Return.HasDelegate)
+                    await Return.InvokeAsync();
             }
-            
+
         }
 
         protected override async Task OnInitializedAsync()
@@ -52,33 +50,18 @@ namespace GPO_BLAZOR.Client.Pages
             isLoading = false;
             try
             {
-                CurrentObject = StatmentDate.Codificator[Number < StatmentDate.Codificator.Count ? Number : StatmentDate.Codificator.Count % Number];
+                 string id = (await StatmenTableModel.Create()).Lines[Number].id;
+                 Date = await Class.Date.Statmen.Create(id);
+                 SelectedPage = Date.Date.First();
             }
             catch (Exception ex)
             {
-
+                Console.WriteLine($"StatmenRenderingException -> {ex.Message}");
             }
-
-
-
-            if (Date == null)
-            {
-                try
-                {
-                    Date = await FieldsConstractor.GetBlock(CurrentObject.ID);
-                }
-                catch (Exception ex)
-                {
-                    Date = await FieldsConstractor.GetBlock();
-                }
-            }
-            
         }
 
         protected override void OnParametersSet()
         {
-            _tempPage = Date.TextValues.First();
-
             isLoading = true;
         }
     }
