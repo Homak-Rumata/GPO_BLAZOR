@@ -9,6 +9,7 @@
     <UserSecretsId>24c7de14-f3cc-45dc-9528-722d43860cc1</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..</DockerfileContext>
+    <StartupObject>GPO_BLAZOR.Program</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>

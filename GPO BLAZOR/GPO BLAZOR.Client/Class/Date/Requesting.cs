@@ -1,4 +1,5 @@
-﻿using Microsoft.JSInterop;
+﻿using GPO_BLAZOR.Client.Class.JSRunTimeAccess;
+using Microsoft.JSInterop;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
@@ -10,8 +11,9 @@ namespace GPO_BLAZOR.Client.Class.Date
         {
             using (HttpClient httpClient = new HttpClient())
             {
-                var cookieStorage = 
-                var jwt = await jsr.InvokeAsync<string>("ReadCookie.ReadCookie", "Autorization").ConfigureAwait(false);
+                var cookieStorage = new CookieStorageAccessor(jsr);
+
+                var jwt = await cookieStorage.ReadCookieAsync<string>("Autorization");
 
                 httpClient.BaseAddress = uri;
                 using var requestMessage = new HttpRequestMessage(HttpMethod.Get, httpClient.BaseAddress);
@@ -26,7 +28,9 @@ namespace GPO_BLAZOR.Client.Class.Date
         {
             using (HttpClient httpClient = new HttpClient())
             {
-                var jwt = await jsr.InvokeAsync<string>("ReadCookie.ReadCookie", "Autorization").ConfigureAwait(false);
+                var cookieStorage = new CookieStorageAccessor(jsr);
+
+                var jwt = await cookieStorage.ReadCookieAsync<string>("Autorization");
 
                 httpClient.BaseAddress = uri;
                 using var requestMessage = new HttpRequestMessage(HttpMethod.Post, httpClient.BaseAddress);

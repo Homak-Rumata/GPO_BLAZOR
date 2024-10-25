@@ -1,7 +1,7 @@
 ﻿export function WriteCookie (name, value, minute) {
 
     var expires;
-    if (days) {
+    if (minute) {
         var date = new Date();
         date.setTime(date.getTime() + (minute * 60 * 1000));
         expires = "; expires=" + date.toGMTString();

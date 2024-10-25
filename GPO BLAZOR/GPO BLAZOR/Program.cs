@@ -312,7 +312,7 @@ namespace GPO_BLAZOR
             {
                 try
                 {
-                    var claims = new List<Claim> { new Claim(ClaimTypes.Name, date.login) };
+                    var claims = new List<Claim> { new Claim(ClaimTypes.Name, date.login), new Claim(ClaimTypes.Role, "student") };
                     var jwt = new JwtSecurityToken(
                             issuer: AuthOptions.ISSUER,
                             audience: AuthOptions.AUDIENCE,
@@ -333,7 +333,7 @@ namespace GPO_BLAZOR
                 catch (Exception ex)
                 {
                     Console.WriteLine($"Error: {ex.Message}");
-                    return Results.Json("token: student,\t\n role = student ");
+                    return Results.Json("token: ,\t\n role:  ");
                 }
             });
 
