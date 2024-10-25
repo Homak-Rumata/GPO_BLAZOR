@@ -44,7 +44,7 @@ namespace GPO_BLAZOR.Client.Class.Date
             {
                 if (reader != null)
                 {
-                    string temp = await reader("Authorization");
+                    string temp = await reader("Autorization");
                     if (temp != null && temp != "")
                     {
                         IsCookies = true;

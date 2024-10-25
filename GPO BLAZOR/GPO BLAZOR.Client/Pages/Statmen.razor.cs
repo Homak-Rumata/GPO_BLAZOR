@@ -51,7 +51,7 @@ namespace GPO_BLAZOR.Client.Pages
             try
             {
                  string id = (await StatmenTableModel.Create(jsr)).Lines[Number].id;
-                 Date = await Class.Date.Statmen.Create(id);
+                 Date = await Class.Date.Statmen.Create(id, jsr);
                  SelectedPage = Date.Date.First();
             }
             catch (Exception ex)

@@ -94,7 +94,7 @@ namespace GPO_BLAZOR.Client.Pages
         protected async Task WriteCookies(string key, string value)
         {
             //await JSRuntime.InvokeAsync<string>("WriteCookie.WriteCookie", "token", value, DateTime.Now.AddMinutes(1));
-
+            Console.WriteLine(DateTime.Now.AddMinutes(1));
             await cookieStorage.WriteCookieAsync(key, value, DateTime.Now.AddMinutes(1));
         }
 

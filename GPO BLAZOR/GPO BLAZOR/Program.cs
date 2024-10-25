@@ -351,7 +351,7 @@ namespace GPO_BLAZOR
             });
 
             app.MapGet("/getstatmens/user:{Token}",[Authorize]()=>b);
-            app.MapGet("/getformDate:{ID}", (string ID) => { app.Logger.LogInformation($"{ID}: {temp[ID]}"); return temp[ID]; });
+            app.MapGet("/getformDate:{ID}", [Authorize] (string ID) => { app.Logger.LogInformation($"{ID}: {temp[ID]}"); return temp[ID]; });
             app.MapPost("/getInfo", (Dictionary<string, string> x)=>
             {
                 Console.WriteLine("------------------------------------------------");
@@ -374,7 +374,7 @@ namespace GPO_BLAZOR
                     app.Logger.LogInformation((new EventId(calculator++, "getInfo")), accamulator);
                     return Results.Ok("sucsefull");
             });
-            app.MapGet("/getTepmlate/{TeplateName}", (string TeplateName) => (StatmenDate.DefaultInfo));
+            app.MapGet("/getTepmlate/{TeplateName}", [Authorize](string TeplateName) => (StatmenDate.DefaultInfo));
 
 
             app.MapRazorComponents<App>()

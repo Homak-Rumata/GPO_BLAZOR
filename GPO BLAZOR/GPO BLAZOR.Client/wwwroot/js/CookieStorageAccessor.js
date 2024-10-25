@@ -1,9 +1,9 @@
-﻿export function WriteCookie (name, value, days) {
+﻿export function WriteCookie (name, value, minute) {
 
     var expires;
     if (days) {
         var date = new Date();
-        date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+        date.setTime(date.getTime() + (minute * 60 * 1000));
         expires = "; expires=" + date.toGMTString();
     }
     else {

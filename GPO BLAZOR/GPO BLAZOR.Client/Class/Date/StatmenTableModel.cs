@@ -47,14 +47,9 @@ namespace GPO_BLAZOR.Client.Class.Date
 
         private static async Task<IStatmenTableLineModel[]> GetLines(string? token, IJSRuntime jsr)
         {
-            using HttpClient httpClient = new HttpClient();
-            var jwt = await jsr.InvokeAsync<string> ("ReadCookie.ReadCookie", "Autorization").ConfigureAwait(false);
-
-            httpClient.BaseAddress = new Uri($"https://{IPaddress.IPAddress}/getstatmens/user:{(token!=null?"token":"-") }");
-            var u = new HttpRequestMessage(HttpMethod.Get, httpClient.BaseAddress);
-            u.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
-            var tempresponce = await httpClient.SendAsync(u);
-            var response = await tempresponce.Content.ReadFromJsonAsync <StatmenTableLineModel[]>();
+            var response = await Requesting.AutorizationRequest<StatmenTableLineModel[]>(
+                new Uri($"https://{IPaddress.IPAddress}/getstatmens/user:{(token != null ? "token" : "-")}"),
+                jsr);
 
             int calculator = 0;
             foreach (var item in response)
