@@ -10,6 +10,7 @@ namespace GPO_BLAZOR.Client.Class.Date
         {
             using (HttpClient httpClient = new HttpClient())
             {
+                var cookieStorage = 
                 var jwt = await jsr.InvokeAsync<string>("ReadCookie.ReadCookie", "Autorization").ConfigureAwait(false);
 
                 httpClient.BaseAddress = uri;

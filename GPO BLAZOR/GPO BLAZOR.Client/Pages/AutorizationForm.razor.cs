@@ -45,6 +45,7 @@ namespace GPO_BLAZOR.Client.Pages
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
+            Console.WriteLine("Рендер " + isLoading);
             isLoading = false;
         }
 
@@ -53,6 +54,7 @@ namespace GPO_BLAZOR.Client.Pages
 
         protected override async Task OnInitializedAsync()
         {
+            Console.WriteLine("Загрузились");
             isLoading = true;
 
             
