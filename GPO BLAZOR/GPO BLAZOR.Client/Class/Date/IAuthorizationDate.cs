@@ -46,12 +46,12 @@
     /// </summary>
     /// <param name="value"> Значение </param>
     /// <returns></returns>
-    public delegate Task Writer(string value);
+    public delegate Task Writer(string key, string value);
     /// <summary>
     /// Делегат чтения их хранилища
     /// </summary>
     /// <returns>
     /// Значение
     /// </returns>
-    public delegate Task<string> Reader();
+    public delegate Task<string> Reader(string key);
 }

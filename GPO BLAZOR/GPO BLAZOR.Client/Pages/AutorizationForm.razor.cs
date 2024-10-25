@@ -23,11 +23,14 @@ namespace GPO_BLAZOR.Client.Pages
         async Task ButtonClicked()
         {
 
-            Console.WriteLine("Callback0: "+ AuthorizationInterface.IsCookies+ AuthorizationInterface.GetHashCode());
+            Console.WriteLine("Callback0: "+ AuthorizationInterface.IsCookies+ " "+ AuthorizationInterface.GetHashCode());
             try
             {
+                Console.WriteLine(AuthorizationInterface);
                 await AuthorizationInterface.GetValues(ReadCookies);
+                Console.WriteLine("CookeiIsRead");
                 await AuthorizationInterfaceChanged.InvokeAsync(AuthorizationInterface);
+                Console.WriteLine("ChangeInterface");
             }
             catch (Exception ex)
             {
@@ -88,17 +91,17 @@ namespace GPO_BLAZOR.Client.Pages
 
 
 
-        protected async Task WriteCookies(string value)
+        protected async Task WriteCookies(string key, string value)
         {
             //await JSRuntime.InvokeAsync<string>("WriteCookie.WriteCookie", "token", value, DateTime.Now.AddMinutes(1));
 
-            await cookieStorage.WriteCookieAsync("token", value, DateTime.Now.AddMinutes(1));
+            await cookieStorage.WriteCookieAsync(key, value, DateTime.Now.AddMinutes(1));
         }
 
 
-        protected async Task<string> ReadCookies()
+        protected async Task<string> ReadCookies(string key)
         {
-            var temp = await cookieStorage.ReadCookieAsync<string>("token");
+            var temp = await cookieStorage.ReadCookieAsync<string>(key);
             try
             {
                 if (temp != null || temp != "")
@@ -110,7 +113,7 @@ namespace GPO_BLAZOR.Client.Pages
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return ("");
+                return ("ReadCookies Error -116 string");
             }
         }
 

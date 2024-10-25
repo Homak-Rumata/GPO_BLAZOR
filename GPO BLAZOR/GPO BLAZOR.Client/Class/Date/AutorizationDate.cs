@@ -44,7 +44,7 @@ namespace GPO_BLAZOR.Client.Class.Date
             {
                 if (reader != null)
                 {
-                    string temp = await reader();
+                    string temp = await reader("Authorization");
                     if (temp != null && temp != "")
                     {
                         IsCookies = true;
@@ -67,7 +67,19 @@ namespace GPO_BLAZOR.Client.Class.Date
         /// <summary>
         /// Поле заполненного логина
         /// </summary>
-        public string Name { get; set; }
+        private string _name;
+        public string Name
+        {
+            get
+            {
+                return _name;
+            }
+            set
+            {
+                Console.WriteLine("Set value Name -> " + _name);
+                _name = value;
+            }
+        }
         /// <summary>
         /// Поле для хранения заполненного пароля
         /// </summary>
@@ -90,7 +102,7 @@ namespace GPO_BLAZOR.Client.Class.Date
         {
             public string token { get; set; }
             public string role { get; set; }
-//            public string jwt { get; set; }
+            public string jwt { get; set; }
         }
 
         /// <summary>
@@ -110,7 +122,10 @@ namespace GPO_BLAZOR.Client.Class.Date
             ///Отправка
         {
 
-            var sentDate = new { login = Name, Password = Password };
+            var sentDate = new { 
+                                login = (Name==""?"Defaultlogin":Name), 
+                                Password = (Password == "" ? "DefaultPassword" : Password) 
+                                };
 
 
             ///Формирование строки запроса
@@ -121,9 +136,9 @@ namespace GPO_BLAZOR.Client.Class.Date
 
             try
             {
-                ///Отправка запроса
+                ////Отправка запроса
                 using HttpResponseMessage response = await httpClient.PostAsync(httpClient.BaseAddress, content);
-
+                Console.WriteLine($"Запрос на авторизацию {content.Value} + -> "+sentDate.login + "->" + Name);
                 ///Проверка ответа
                 try
                 {
@@ -144,7 +159,11 @@ namespace GPO_BLAZOR.Client.Class.Date
 
                             }
 
-                            await _writer(newPerson.token);
+                            await _writer("token", newPerson.token);
+                            await _writer("Autorization", newPerson.jwt);
+#if RELEASE
+                            Console.WriteLine("Токен записан");
+#endif
                         }
                     }
                     else
@@ -158,7 +177,9 @@ namespace GPO_BLAZOR.Client.Class.Date
                         }
                         catch (Exception ex)
                         {
+#if RELEASE
                             Console.WriteLine("Aurotization error :" + ex.Message);
+#endif
                             RequestMessage = "Response have not body!";
                         }
                     }
@@ -167,6 +188,7 @@ namespace GPO_BLAZOR.Client.Class.Date
                 {
                     Console.WriteLine($"Response Autorization Error -> {ex.Message}");
                 }
+#if RELEASE
                 finally
                 {
                     
@@ -174,9 +196,10 @@ namespace GPO_BLAZOR.Client.Class.Date
                         .Content.ReadAsStringAsync();
 
                     if (responseText != null && responseText != "")
-                    Console.WriteLine("Autorization error: " + responseText);
+                    Console.WriteLine("Финальный блок авторизации: " + responseText);
 
                 }
+#endif
             }
             catch (Exception ex)
             {
@@ -194,10 +217,14 @@ namespace GPO_BLAZOR.Client.Class.Date
             try
             {
                 await SendDate();
-                string temp = await _reader();
+                string temp = await _reader("Autorization");
                 if (temp != null && temp != "")
                 {
                     IsCookies = true;
+
+#if RELEASE
+                    Console.WriteLine("Set CookieTrue");
+#endif
                 }
                 /*else
                 {
@@ -206,7 +233,9 @@ namespace GPO_BLAZOR.Client.Class.Date
             }
             catch (Exception ex)
             {
+#if RELEASE
                 Console.WriteLine("Cookie Interfase Send "+ex.Message);
+#endif
             }
         }
     }

@@ -13,13 +13,20 @@ using GPO_BLAZOR.DBAgents;
 using Microsoft.AspNetCore.Identity;
 using GPO_BLAZOR.DBAgents;
 using GPO_BLAZOR.DBAgents.DBModels;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.OAuth;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GPO_BLAZOR
 {
     class Date
     {
         public Guid token { get; set; }
-        //public string jwt { get; set; }
+        public string jwt { get; set; }
         public string role { get; set; }
     }
 
@@ -171,6 +178,19 @@ namespace GPO_BLAZOR
         public string messege { get; set; }
     }
 
+    /// <summary>
+    /// Исправить
+    /// </summary>
+    public static class AuthOptions
+    {
+        public const string ISSUER = "MyAuthServer"; // издатель токена
+        public const string AUDIENCE = "MyAuthClient"; // потребитель токена
+        const string KEY = "mysupersecret_secretsecretsecretkey!123";   // ключ для шифрации
+        public static SymmetricSecurityKey GetSymmetricSecurityKey() =>
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(KEY));
+    }
+    //
+
     public class Program
     {
         static Dictionary<string, List<string>> SpecialArray = new Dictionary<string, List<string>>()
@@ -207,8 +227,25 @@ namespace GPO_BLAZOR
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
+
+
             builder.Services.AddScoped<AuthenticationStateProvider, IdentetyAuthenticationStateProvider>();
 
+            builder.Services.AddAuthorization();
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = AuthOptions.ISSUER,
+                        ValidateAudience = true,
+                        ValidAudience = AuthOptions.AUDIENCE,
+                        ValidateLifetime = true,
+                        IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
+                        ValidateIssuerSigningKey = true,
+                    };
+                });
 
 
 
@@ -270,13 +307,28 @@ namespace GPO_BLAZOR
 
             app.MapGet("/GetAtributes/{Field}", (string Field) => SpecialArray[Field]);
             app.MapGet("/GetAtributes", () => new string[] { "A", "Б", "В" });
-            app.MapPost("/autorization", (AutorizationDate date) =>
+
+            app.MapPost("/autorization", (API_Functions.Autorization.AutorizationDate date) =>
             {
                 try
-                {                  
-                    return !(date.login == "censor" && date.Password=="12345678")?
+                {
+                    var claims = new List<Claim> { new Claim(ClaimTypes.Name, date.login) };
+                    var jwt = new JwtSecurityToken(
+                            issuer: AuthOptions.ISSUER,
+                            audience: AuthOptions.AUDIENCE,
+                            claims: claims,
+                            expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(2)), // время действия 2 минуты
+                            signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
+
+                    return Results.Json(new Date(){
+                        token = (Guid.NewGuid()),
+                        jwt = new JwtSecurityTokenHandler().WriteToken(jwt), 
+                        role = "student" 
+                    });
+                    /*
+                    return !(API_Functions.Autorization.checkuser(date, cntx).Result) ?
                     Results.Problem("not login or password", "nonautorization", 401, "bad login or password)", "nontype", new Dictionary<string, object> { { "messege", "bad login or password"} }) :
-                    Results.Json(new Date() { token = (Guid.NewGuid()), role = "student" });
+                    Results.Json(new Date() { token = (Guid.NewGuid()), role = "student" });*/
                 }
                 catch (Exception ex)
                 {
@@ -284,7 +336,21 @@ namespace GPO_BLAZOR
                     return Results.Json("token: student,\t\n role = student ");
                 }
             });
-            app.MapGet("/getstatmens/user:{Token}",()=>b);
+
+            app.Map("/login/{username}", (string username) =>
+            {
+                var claims = new List<Claim> { new Claim(ClaimTypes.Name, username) };
+                var jwt = new JwtSecurityToken(
+                        issuer: AuthOptions.ISSUER,
+                        audience: AuthOptions.AUDIENCE,
+                        claims: claims,
+                        expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(2)), // время действия 2 минуты
+                        signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
+
+                return Results.Json( new { token = new JwtSecurityTokenHandler().WriteToken(jwt), role = "student"});
+            });
+
+            app.MapGet("/getstatmens/user:{Token}",[Authorize]()=>b);
             app.MapGet("/getformDate:{ID}", (string ID) => { app.Logger.LogInformation($"{ID}: {temp[ID]}"); return temp[ID]; });
             app.MapPost("/getInfo", (Dictionary<string, string> x)=>
             {
