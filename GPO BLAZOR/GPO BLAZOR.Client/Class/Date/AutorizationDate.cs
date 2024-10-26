@@ -5,6 +5,8 @@ using System.Reflection.PortableExecutable;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using GPO_BLAZOR.Client.Class.JSRunTimeAccess;
+using System.Net.Http.Headers;
+using System.Net;
 
 namespace GPO_BLAZOR.Client.Class.Date
 {
@@ -76,7 +78,6 @@ namespace GPO_BLAZOR.Client.Class.Date
             }
             set
             {
-                Console.WriteLine("Set value Name -> " + _name);
                 _name = value;
             }
         }
@@ -113,7 +114,79 @@ namespace GPO_BLAZOR.Client.Class.Date
             public string messege { get; set; }
         }
 
-        
+        private record struct NewJWTResponce
+        {
+            public string jwt { get; set; }
+        }
+
+        /// <summary>
+        /// Обновление  JWT
+        /// </summary>
+        /// <returns></returns>
+        private async Task RewriteJWT ()
+        {
+            try
+            {
+                HttpClient httpClient = new HttpClient();
+                httpClient.BaseAddress = new Uri($"https://{IPaddress.IPAddress}/newJWT");
+#if DEBUG
+                Console.WriteLine("Start jwt Synchronistaion");
+#endif
+                while (true)
+                {
+                    using var requestMessage = new HttpRequestMessage(HttpMethod.Get, httpClient.BaseAddress);
+#if DEBUG
+                    Console.WriteLine("InWhile");
+#endif
+                    await Task.Delay(new TimeSpan(0, 0, 20));
+#if DEBUG
+                    Console.WriteLine("Start jwt synfronisationcpocedure");
+#endif
+                    var jwt = await _reader("Autorization");
+                    requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", jwt);
+#if DEBUG
+                    Console.WriteLine("Send jwt sync requestion.....");
+#endif 
+                    HttpResponseMessage tempresponce;
+                    try
+                    {
+                        tempresponce = await httpClient.SendAsync(requestMessage);
+                    }
+                    catch
+                    {
+                        await Task.Delay(100);
+                        tempresponce = await httpClient.SendAsync(requestMessage);
+                    }
+#if DEBUG
+                    Console.WriteLine("SendOldJWT");
+#endif
+                    if (tempresponce.IsSuccessStatusCode)
+                    {
+                        string newjwt = (await tempresponce.Content.ReadFromJsonAsync<NewJWTResponce>()).jwt;
+                        await _writer("Autorization", newjwt);
+#if DEBUG
+                        Console.WriteLine("GetNewJWT: " + newjwt);
+                    }
+                    else
+                    {
+                        throw (new Exception("Invalid Status Code: "+tempresponce.StatusCode));
+                    }
+#endif
+                }
+            }
+            catch (Exception ex)
+            {
+                ErrorInAutorization();
+                Console.WriteLine($"JSON sync error -> {ex.Message}");
+            }
+            
+        }
+
+        /// <summary>
+        /// Событие - ошибка авторизации
+        /// </summary>
+        public Action ErrorInAutorization;
+
         /// <summary>
         /// Отправка данных и запись оных в внутреннее хранилище
         /// </summary>
@@ -138,7 +211,9 @@ namespace GPO_BLAZOR.Client.Class.Date
             {
                 ////Отправка запроса
                 using HttpResponseMessage response = await httpClient.PostAsync(httpClient.BaseAddress, content);
+#if DEBUG
                 Console.WriteLine($"Запрос на авторизацию {content.Value} + -> "+sentDate.login + "->" + Name);
+#endif
                 ///Проверка ответа
                 try
                 {
@@ -161,7 +236,8 @@ namespace GPO_BLAZOR.Client.Class.Date
 
                             await _writer("token", newPerson.token);
                             await _writer("Autorization", newPerson.jwt);
-#if RELEASE
+                            RewriteJWT();
+#if DEBUG
                             Console.WriteLine("Токен записан");
 #endif
                         }
@@ -177,7 +253,7 @@ namespace GPO_BLAZOR.Client.Class.Date
                         }
                         catch (Exception ex)
                         {
-#if RELEASE
+#if DEBUG
                             Console.WriteLine("Aurotization error :" + ex.Message);
 #endif
                             RequestMessage = "Response have not body!";
@@ -188,7 +264,7 @@ namespace GPO_BLAZOR.Client.Class.Date
                 {
                     Console.WriteLine($"Response Autorization Error -> {ex.Message}");
                 }
-#if RELEASE
+#if DEBUG
                 finally
                 {
                     
@@ -203,6 +279,7 @@ namespace GPO_BLAZOR.Client.Class.Date
             }
             catch (Exception ex)
             {
+                ErrorInAutorization();
                 Console.WriteLine($"Cookie Interfase SendDate -> " + ex.Message);
             }
         }
@@ -222,7 +299,7 @@ namespace GPO_BLAZOR.Client.Class.Date
                 {
                     IsCookies = true;
 
-#if RELEASE
+#if DEBUG
                     Console.WriteLine("Set CookieTrue");
 #endif
                 }
@@ -233,9 +310,8 @@ namespace GPO_BLAZOR.Client.Class.Date
             }
             catch (Exception ex)
             {
-#if RELEASE
-                Console.WriteLine("Cookie Interfase Send "+ex.Message);
-#endif
+                ErrorInAutorization();
+                Console.WriteLine("Cookie Interfase Send -> "+ex.Message);
             }
         }
     }

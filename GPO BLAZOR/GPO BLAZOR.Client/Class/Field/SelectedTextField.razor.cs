@@ -19,7 +19,7 @@ namespace GPO_BLAZOR.Client.Class.Field
             }
             finally
             {
-                base.OnInitializedAsync();
+                await base.OnInitializedAsync();
             }
         }
 

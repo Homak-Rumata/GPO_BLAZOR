@@ -312,6 +312,8 @@ namespace GPO_BLAZOR
             {
                 try
                 {
+                    app.Logger.LogInformation($"User loging: {date.login}");
+
                     var claims = new List<Claim> { new Claim(ClaimTypes.Name, date.login), new Claim(ClaimTypes.Role, "student") };
                     var jwt = new JwtSecurityToken(
                             issuer: AuthOptions.ISSUER,
@@ -319,6 +321,8 @@ namespace GPO_BLAZOR
                             claims: claims,
                             expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(2)), // время действия 2 минуты
                             signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
+
+
 
                     return Results.Json(new Date(){
                         token = (Guid.NewGuid()),
@@ -332,22 +336,35 @@ namespace GPO_BLAZOR
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error: {ex.Message}");
+                    app.Logger.LogError($"User: {date.login}\nError: {ex.Message}");
                     return Results.Json("token: ,\t\n role:  ");
                 }
             });
 
-            app.Map("/login/{username}", (string username) =>
+            app.Map("/newJWT", (HttpContext a) =>
             {
-                var claims = new List<Claim> { new Claim(ClaimTypes.Name, username) };
-                var jwt = new JwtSecurityToken(
-                        issuer: AuthOptions.ISSUER,
-                        audience: AuthOptions.AUDIENCE,
-                        claims: claims,
-                        expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(2)), // время действия 2 минуты
-                        signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
+                app.Logger.LogInformation("ResponceJWT");
+                var o = a.User.Identity;
+                if (o is not null && o.IsAuthenticated)
+                {
+                    var claims = a.User.Claims;
+                    foreach (var i in claims)
+                    {
+                        app.Logger.LogDebug("claim " + i.Value +i.ValueType+" "+i.Type+" "+i.Subject+" ");
+                    }
+                    var jwt = new JwtSecurityToken(
+                            issuer: AuthOptions.ISSUER,
+                            audience: AuthOptions.AUDIENCE,
+                            claims: claims,
+                            expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(2)), // время действия 2 минуты
+                            signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
+                    app.Logger.LogInformation($"User: {a.User.Identity.Name} \nnewJWT: {jwt}");
+                    return Results.Json(new { jwt = new JwtSecurityTokenHandler().WriteToken(jwt) });
+                }
+                app.Logger.LogError($"Error new JWT: {a.User.Identity.Name} "+o+" "+o.IsAuthenticated );
+                return Results.NotFound();
 
-                return Results.Json( new { token = new JwtSecurityTokenHandler().WriteToken(jwt), role = "student"});
+                
             });
 
             app.MapGet("/getstatmens/user:{Token}",[Authorize]()=>b);

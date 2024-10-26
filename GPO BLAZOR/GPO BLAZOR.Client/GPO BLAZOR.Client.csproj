@@ -8,6 +8,7 @@
     <StaticWebAssetProjectMode>Default</StaticWebAssetProjectMode>
     <RootNamespace>GPO BLAZOR.Client</RootNamespace>
     <AssemblyName>$(AssemblyName.Replace(' ', '_'))</AssemblyName>
+    <Configurations>Debug;Release;IIS DEBUG</Configurations>
   </PropertyGroup>
 
   <ItemGroup>

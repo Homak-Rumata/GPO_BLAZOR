@@ -10,6 +10,7 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..</DockerfileContext>
     <StartupObject>GPO_BLAZOR.Program</StartupObject>
+    <Configurations>Debug;Release;IIS DEBUG</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
