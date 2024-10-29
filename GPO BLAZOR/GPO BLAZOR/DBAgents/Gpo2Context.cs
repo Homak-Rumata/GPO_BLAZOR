@@ -7,16 +7,18 @@ namespace GPO_BLAZOR.DBAgents;
 
 public partial class Gpo2Context : DbContext
 {
-    public Gpo2Context()
+    public Gpo2Context(string password)
     {
-
+        _password = password;
     }
 
-    public Gpo2Context(DbContextOptions<Gpo2Context> options)
+    public Gpo2Context(DbContextOptions<Gpo2Context> options, string password)
         : base(options)
     {
-
+        _password = password;
     }
+
+    private string _password;
 
     public virtual DbSet<AskForm> Ancets { get; set; }
 
@@ -42,7 +44,7 @@ public partial class Gpo2Context : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
 #warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseNpgsql("Host=localhost;Port=5432;Database=gpo2;Username=postgres;Password=NiK!1488");
+        => optionsBuilder.UseNpgsql($"Host=localhost;Port=5432;Database=gpo2;Username=postgres;Password={_password}");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

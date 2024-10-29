@@ -20,9 +20,12 @@ using System.Text;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using GPO_BLAZOR.API_Functions;
 
 namespace GPO_BLAZOR
 {
+
+
     class Date
     {
         public Guid token { get; set; }
@@ -203,7 +206,8 @@ namespace GPO_BLAZOR
 
         public static void Main(string[] args)
         {
-            Gpo2Context cntx = new Gpo2Context();
+            Console.Write("Data Base Password: ");
+            Gpo2Context cntx = new Gpo2Context(Console.ReadLine());
             
             
            // DBConnector.F(null);
@@ -304,14 +308,22 @@ namespace GPO_BLAZOR
             app.UseCookiePolicy();
             app.UseStaticFiles();
             app.UseAntiforgery();
+            
+            
 
             app.MapGet("/GetAtributes/{Field}", (string Field) => SpecialArray[Field]);
             app.MapGet("/GetAtributes", () => new string[] { "A", "Б", "В" });
 
-            app.MapPost("/autorization", (API_Functions.Autorization.AutorizationDate date) =>
+            app.MapPost("/autorization", (Autorization.AutorizationDate date) =>
             {
                 try
                 {
+
+                    if (!(Autorization.checkuser(date, cntx).Result))
+                    {
+                        return Results.Problem("not login or password", "nonautorization", 401, "bad login or password)", "nontype", new Dictionary<string, object> { { "messege", "bad login or password" } });
+                    }
+
                     app.Logger.LogInformation($"User loging: {date.login}");
 
                     var claims = new List<Claim> { new Claim(ClaimTypes.Name, date.login), new Claim(ClaimTypes.Role, "student") };
@@ -337,7 +349,7 @@ namespace GPO_BLAZOR
                 catch (Exception ex)
                 {
                     app.Logger.LogError($"User: {date.login}\nError: {ex.Message}");
-                    return Results.Json("token: ,\t\n role:  ");
+                    return Results.Problem();
                 }
             });
 
@@ -354,7 +366,6 @@ namespace GPO_BLAZOR
                     }
                     var jwt = new JwtSecurityToken(
                             issuer: AuthOptions.ISSUER,
-                            audience: AuthOptions.AUDIENCE,
                             claims: claims,
                             expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(2)), // время действия 2 минуты
                             signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
