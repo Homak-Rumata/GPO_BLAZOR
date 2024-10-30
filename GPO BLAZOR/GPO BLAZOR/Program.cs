@@ -288,6 +288,7 @@ namespace GPO_BLAZOR
             XmlDocument fgh = new XmlDocument();
             fgh.LoadXml("<reply success=\"true\">More nodes go here</reply>");
 
+            Dictionary<string, string> PrintTemplate = null;
 
 
             bool AddOnDictionary<Key, Value>(Dictionary<Key, Value> dictionary, KeyValuePair<Key, Value> value)
@@ -310,10 +311,13 @@ namespace GPO_BLAZOR
             app.UseAntiforgery();
             
             
-
+            ///API списка полей
             app.MapGet("/GetAtributes/{Field}", (string Field) => SpecialArray[Field]);
+
+
             app.MapGet("/GetAtributes", () => new string[] { "A", "Б", "В" });
 
+            ///API авторизации
             app.MapPost("/autorization", (Autorization.AutorizationDate date) =>
             {
                 try
@@ -353,6 +357,7 @@ namespace GPO_BLAZOR
                 }
             });
 
+            ///API перевыдача токена
             app.Map("/newJWT", (HttpContext a) =>
             {
                 app.Logger.LogInformation("ResponceJWT");
@@ -378,8 +383,13 @@ namespace GPO_BLAZOR
                 
             });
 
+            ///API списка заявлений
             app.MapGet("/getstatmens/user:{Token}",[Authorize]()=>b);
+
+            ///API заявления
             app.MapGet("/getformDate:{ID}", [Authorize] (string ID) => { app.Logger.LogInformation($"{ID}: {temp[ID]}"); return temp[ID]; });
+
+            ///API Получение полей данных
             app.MapPost("/getInfo", (Dictionary<string, string> x)=>
             {
                 Console.WriteLine("------------------------------------------------");
@@ -394,6 +404,7 @@ namespace GPO_BLAZOR
 
                 x.Remove("id");
 
+                ///Заполнение аккамулятора для лога + добавление в словарь
                 foreach (var item in x)
                 {
                      accamulator+=$"{item.Key}: {(item.Value==null||item.Value==("")?("none"):item.Value)}: {AddOnDictionary(temp[id], item)}\n";
@@ -402,14 +413,18 @@ namespace GPO_BLAZOR
                     app.Logger.LogInformation((new EventId(calculator++, "getInfo")), accamulator);
                     return Results.Ok("sucsefull");
             });
+
+            ///API шаблона документа
             app.MapGet("/getTepmlate/{TeplateName}", [Authorize](string TeplateName) => (StatmenDate.DefaultInfo));
 
+            //API шаблона печати
+            app.MapGet("/GetPrintAtribute/{TemplateName}", [Authorize](string TemplateName) => PrintTemplate[TemplateName]);
 
             app.MapRazorComponents<App>()
                 .AddInteractiveWebAssemblyRenderMode()
                 .AddAdditionalAssemblies(typeof(Client._Imports).Assembly);
 
-            app.Run();
+            app.Run(); 
         }
     }
 
