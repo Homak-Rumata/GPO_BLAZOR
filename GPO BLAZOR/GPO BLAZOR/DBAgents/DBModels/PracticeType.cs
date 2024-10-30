@@ -2,17 +2,16 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GPO_BLAZOR.DBAgents.DBModels;
+namespace DBAgent.Models;
+
 /// <summary>
 /// Вид и тип практики
 /// </summary>
 [Table("ВидИТипПрактики")]
-public partial class TypeandViemType
+public partial class PracticeType
 {
-    /// <summary>
-    /// ID
-    /// </summary>
-    public decimal Id { get; set; }
+    public int Id { get; set; }
+
     /// <summary>
     /// Название
     /// </summary>

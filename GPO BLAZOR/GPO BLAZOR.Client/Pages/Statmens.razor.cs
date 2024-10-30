@@ -26,7 +26,7 @@ namespace GPO_BLAZOR.Client.Pages
 
             try
             {
-                Date ??= await StatmenTableModel.Create();
+                Date ??= await StatmenTableModel.Create(jsr);
             }
             catch (Exception ex)
             {

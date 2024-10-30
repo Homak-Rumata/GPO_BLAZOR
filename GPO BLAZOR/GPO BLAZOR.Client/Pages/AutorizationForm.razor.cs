@@ -23,9 +23,12 @@ namespace GPO_BLAZOR.Client.Pages
         async Task ButtonClicked()
         {
 
-            Console.WriteLine("Callback0: "+ AuthorizationInterface.IsCookies+ AuthorizationInterface.GetHashCode());
+#if DEBUG            
+            Console.WriteLine("Callback0: "+ AuthorizationInterface.IsCookies+ " "+ AuthorizationInterface.GetHashCode());
+#endif
             try
             {
+                Console.WriteLine(AuthorizationInterface);
                 await AuthorizationInterface.GetValues(ReadCookies);
                 await AuthorizationInterfaceChanged.InvokeAsync(AuthorizationInterface);
             }
@@ -42,6 +45,9 @@ namespace GPO_BLAZOR.Client.Pages
 
         protected override async Task OnAfterRenderAsync(bool firstRender)
         {
+#if DEBUG
+            Console.WriteLine("Рендер " + isLoading);
+#endif
             isLoading = false;
         }
 
@@ -50,6 +56,9 @@ namespace GPO_BLAZOR.Client.Pages
 
         protected override async Task OnInitializedAsync()
         {
+#if DEBUG
+            //            Console.WriteLine("Загрузились");
+#endif
             isLoading = true;
 
             
@@ -88,17 +97,18 @@ namespace GPO_BLAZOR.Client.Pages
 
 
 
-        protected async Task WriteCookies(string value)
+        protected async Task WriteCookies(string key, string value)
         {
-            //await JSRuntime.InvokeAsync<string>("WriteCookie.WriteCookie", "token", value, DateTime.Now.AddMinutes(1));
-
-            await cookieStorage.WriteCookieAsync("token", value, DateTime.Now.AddMinutes(1));
+#if DEBUG
+            Console.WriteLine(DateTime.Now.AddMinutes(1));
+#endif
+            await cookieStorage.WriteCookieAsync(key, value, DateTime.Now.AddMinutes(1));
         }
 
 
-        protected async Task<string> ReadCookies()
+        protected async Task<string> ReadCookies(string key)
         {
-            var temp = await cookieStorage.ReadCookieAsync<string>("token");
+            var temp = await cookieStorage.ReadCookieAsync<string>(key);
             try
             {
                 if (temp != null || temp != "")
@@ -110,7 +120,7 @@ namespace GPO_BLAZOR.Client.Pages
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                return ("");
+                return ("ReadCookies Error");
             }
         }
 

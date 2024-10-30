@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GPO_BLAZOR.DBAgents.DBModels;
+namespace DBAgent.Models;
+
 /// <summary>
-/// Инофрмация о студентах
+/// Студент
 /// </summary>
 [Table("Студент")]
 public partial class Student
@@ -13,19 +14,15 @@ public partial class Student
     /// Пользователь
     /// </summary>
     [Column("Пользователь")]
-    public decimal User { get; set; }
+    public int User { get; set; }
+
     /// <summary>
     /// Группа
     /// </summary>
     [Column("Группа")]
     public string Group { get; set; } = null!;
-    /// <summary>
-    /// Год поступления
-    /// </summary>
-    [Column("ГодПоступления")]
-    public string AdmissionYear { get; set; } = null!;
 
-    public virtual Groups GroupsNavigation { get; set; } = null!;
+    public virtual Group GroupNavigation { get; set; } = null!;
 
     public virtual User UserNavigation { get; set; } = null!;
 }

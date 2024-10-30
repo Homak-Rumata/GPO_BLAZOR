@@ -11,15 +11,24 @@ using System.Xml.Serialization;
 using System;
 using GPO_BLAZOR.DBAgents;
 using Microsoft.AspNetCore.Identity;
-using GPO_BLAZOR.DBAgents;
-using GPO_BLAZOR.DBAgents.DBModels;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.OAuth;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using GPO_BLAZOR.API_Functions;
+using DBAgent;
 
 namespace GPO_BLAZOR
 {
+
+
     class Date
     {
         public Guid token { get; set; }
-        //public string jwt { get; set; }
+        public string jwt { get; set; }
         public string role { get; set; }
     }
 
@@ -171,6 +180,19 @@ namespace GPO_BLAZOR
         public string messege { get; set; }
     }
 
+    /// <summary>
+    /// Исправить
+    /// </summary>
+    public static class AuthOptions
+    {
+        public const string ISSUER = "MyAuthServer"; // издатель токена
+        public const string AUDIENCE = "MyAuthClient"; // потребитель токена
+        const string KEY = "mysupersecret_secretsecretsecretkey!123";   // ключ для шифрации
+        public static SymmetricSecurityKey GetSymmetricSecurityKey() =>
+            new SymmetricSecurityKey(Encoding.UTF8.GetBytes(KEY));
+    }
+    //
+
     public class Program
     {
         static Dictionary<string, List<string>> SpecialArray = new Dictionary<string, List<string>>()
@@ -183,7 +205,8 @@ namespace GPO_BLAZOR
 
         public static void Main(string[] args)
         {
-            Gpo2Context cntx = new Gpo2Context();
+            Console.Write("Data Base Password: ");
+            Gpo2Context cntx = new Gpo2Context(Console.ReadLine());
             
             
            // DBConnector.F(null);
@@ -207,8 +230,25 @@ namespace GPO_BLAZOR
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
+
+
             builder.Services.AddScoped<AuthenticationStateProvider, IdentetyAuthenticationStateProvider>();
 
+            builder.Services.AddAuthorization();
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = AuthOptions.ISSUER,
+                        ValidateAudience = true,
+                        ValidAudience = AuthOptions.AUDIENCE,
+                        ValidateLifetime = true,
+                        IssuerSigningKey = AuthOptions.GetSymmetricSecurityKey(),
+                        ValidateIssuerSigningKey = true,
+                    };
+                });
 
 
 
@@ -247,6 +287,7 @@ namespace GPO_BLAZOR
             XmlDocument fgh = new XmlDocument();
             fgh.LoadXml("<reply success=\"true\">More nodes go here</reply>");
 
+            Dictionary<string, string> PrintTemplate = null;
 
 
             bool AddOnDictionary<Key, Value>(Dictionary<Key, Value> dictionary, KeyValuePair<Key, Value> value)
@@ -267,25 +308,89 @@ namespace GPO_BLAZOR
             app.UseCookiePolicy();
             app.UseStaticFiles();
             app.UseAntiforgery();
-
+            
+            
+            ///API списка полей
             app.MapGet("/GetAtributes/{Field}", (string Field) => SpecialArray[Field]);
+
+
             app.MapGet("/GetAtributes", () => new string[] { "A", "Б", "В" });
-            app.MapPost("/autorization", (AutorizationDate date) =>
+
+            app.Logger.LogDebug("DEBUGSTART:");
+
+            ///API авторизации
+            app.MapPost("/autorization", (Autorization.AutorizationDate date) =>
             {
                 try
-                {                  
-                    return !(date.login == "censor" && date.Password=="12345678")?
+                {
+
+                    if (!(Autorization.checkuser(date, cntx).Result))
+                    {
+                        return Results.Problem("not login or password", "nonautorization", 401, "bad login or password)", "nontype", new Dictionary<string, object> { { "messege", "bad login or password" } });
+                    }
+
+                    app.Logger.LogInformation($"User loging: {date.login}");
+
+                    var claims = new List<Claim> { new Claim(ClaimTypes.Name, date.login), new Claim(ClaimTypes.Role, "student") };
+                    var jwt = new JwtSecurityToken(
+                            issuer: AuthOptions.ISSUER,
+                            audience: AuthOptions.AUDIENCE,
+                            claims: claims,
+                            expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(2)), // время действия 2 минуты
+                            signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
+
+
+
+                    return Results.Json(new Date(){
+                        token = (Guid.NewGuid()),
+                        jwt = new JwtSecurityTokenHandler().WriteToken(jwt), 
+                        role = "student" 
+                    });
+                    /*
+                    return !(API_Functions.Autorization.checkuser(date, cntx).Result) ?
                     Results.Problem("not login or password", "nonautorization", 401, "bad login or password)", "nontype", new Dictionary<string, object> { { "messege", "bad login or password"} }) :
-                    Results.Json(new Date() { token = (Guid.NewGuid()), role = "student" });
+                    Results.Json(new Date() { token = (Guid.NewGuid()), role = "student" });*/
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Error: {ex.Message}");
-                    return Results.Json("token: student,\t\n role = student ");
+                    app.Logger.LogError($"User: {date.login}\nError: {ex.Message}");
+                    return Results.Problem();
                 }
             });
-            app.MapGet("/getstatmens/user:{Token}",()=>b);
-            app.MapGet("/getformDate:{ID}", (string ID) => { app.Logger.LogInformation($"{ID}: {temp[ID]}"); return temp[ID]; });
+
+            ///API перевыдача токена
+            app.Map("/newJWT", (HttpContext a) =>
+            {
+                app.Logger.LogInformation("ResponceJWT");
+                var o = a.User.Identity;
+                if (o is not null && o.IsAuthenticated)
+                {
+                    var claims = a.User.Claims;
+                    foreach (var i in claims)
+                    {
+                        app.Logger.LogDebug("claim " + i.Value +i.ValueType+" "+i.Type+" "+i.Subject+" ");
+                    }
+                    var jwt = new JwtSecurityToken(
+                            issuer: AuthOptions.ISSUER,
+                            claims: claims,
+                            expires: DateTime.UtcNow.Add(TimeSpan.FromMinutes(2)), // время действия 2 минуты
+                            signingCredentials: new SigningCredentials(AuthOptions.GetSymmetricSecurityKey(), SecurityAlgorithms.HmacSha256));
+                    app.Logger.LogInformation($"User: {a.User.Identity.Name} \nnewJWT: {jwt}");
+                    return Results.Json(new { jwt = new JwtSecurityTokenHandler().WriteToken(jwt) });
+                }
+                app.Logger.LogError($"Error new JWT: {a.User.Identity.Name} "+o+" "+o.IsAuthenticated );
+                return Results.NotFound();
+
+                
+            });
+
+            ///API списка заявлений
+            app.MapGet("/getstatmens/user:{Token}",[Authorize]()=>b);
+
+            ///API заявления
+            app.MapGet("/getformDate:{ID}", [Authorize] (string ID) => { app.Logger.LogInformation($"{ID}: {temp[ID]}"); return temp[ID]; });
+
+            ///API Получение полей данных
             app.MapPost("/getInfo", (Dictionary<string, string> x)=>
             {
                 Console.WriteLine("------------------------------------------------");
@@ -300,6 +405,7 @@ namespace GPO_BLAZOR
 
                 x.Remove("id");
 
+                ///Заполнение аккамулятора для лога + добавление в словарь
                 foreach (var item in x)
                 {
                      accamulator+=$"{item.Key}: {(item.Value==null||item.Value==("")?("none"):item.Value)}: {AddOnDictionary(temp[id], item)}\n";
@@ -308,14 +414,18 @@ namespace GPO_BLAZOR
                     app.Logger.LogInformation((new EventId(calculator++, "getInfo")), accamulator);
                     return Results.Ok("sucsefull");
             });
-            app.MapGet("/getTepmlate/{TeplateName}", (string TeplateName) => (StatmenDate.DefaultInfo));
 
+            ///API шаблона документа
+            app.MapGet("/getTepmlate/{TeplateName}", [Authorize](string TeplateName) => (StatmenDate.DefaultInfo));
+
+            //API шаблона печати
+            app.MapGet("/GetPrintAtribute/{TemplateName}", [Authorize](string TemplateName) => PrintTemplate[TemplateName]);
 
             app.MapRazorComponents<App>()
                 .AddInteractiveWebAssemblyRenderMode()
                 .AddAdditionalAssemblies(typeof(Client._Imports).Assembly);
 
-            app.Run();
+            app.Run(); 
         }
     }
 

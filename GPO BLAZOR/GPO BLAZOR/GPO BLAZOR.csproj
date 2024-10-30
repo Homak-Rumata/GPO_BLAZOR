@@ -9,10 +9,29 @@
     <UserSecretsId>24c7de14-f3cc-45dc-9528-722d43860cc1</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..</DockerfileContext>
+    <StartupObject>GPO_BLAZOR.Program</StartupObject>
+    <Configurations>Debug;Release;IIS DEBUG</Configurations>
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="PDFConstructor\FormTemplate\**" />
+    <Compile Remove="DBAgent\**" />
+    <Compile Remove="wwwroot\Новая папка\**" />
+    <Content Remove="PDFConstructor\FormTemplate\**" />
+    <Content Remove="DBAgent\**" />
+    <Content Remove="wwwroot\Новая папка\**" />
+    <EmbeddedResource Remove="PDFConstructor\FormTemplate\**" />
+    <EmbeddedResource Remove="DBAgent\**" />
+    <EmbeddedResource Remove="wwwroot\Новая папка\**" />
+    <None Remove="PDFConstructor\FormTemplate\**" />
+    <None Remove="DBAgent\**" />
+    <None Remove="wwwroot\Новая папка\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\GPO BLAZOR.Client\GPO BLAZOR.Client.csproj" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.10" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.Server" Version="8.0.10" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Formatters.Xml" Version="2.2.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.10">
@@ -20,15 +39,19 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
+    <PackageReference Include="MSTest.TestFramework" Version="3.6.1" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.8" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.10" />
     <PackageReference Include="PDFsharp" Version="6.1.1" />
     <PackageReference Include="PDFsharp-MigraDoc" Version="6.1.1" />
+    <PackageReference Include="runtime.native.System.Security.Cryptography.OpenSsl" Version="4.3.3" />
+    <PackageReference Include="System.Security.Cryptography.OpenSsl" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="DBAgents\FormTemplate\" />
+    <Folder Include="wwwroot\bootstrap\" />
   </ItemGroup>
 
 </Project>

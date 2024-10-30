@@ -11,6 +11,10 @@
         /// <summary>
         /// Адресс сервера с БД
         /// </summary>
+#if IIS_DEBUG
+        public const string IPAddress = "localhost:44338";
+#else
         public const string IPAddress = "localhost:3001";
+#endif
     }
 }

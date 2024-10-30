@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Microsoft.JSInterop;
+using System.Collections.Generic;
 using System.Net.Http.Json;
 
 namespace GPO_BLAZOR.Client.Class.Date
@@ -40,16 +41,14 @@ namespace GPO_BLAZOR.Client.Class.Date
             return AddId(result);
         }
 
-        public async static Task<IStatmen> Create(string id)
+        public async static Task<IStatmen> Create(string id, IJSRuntime jsr)
         {
             Dictionary<string, string> values;
             try
             {
-                using (HttpClient httpClient = new HttpClient())
-                {
-                    httpClient.BaseAddress = new Uri($"https://{IPaddress.IPAddress}/getformDate:{id}");
-                    values = await httpClient.GetFromJsonAsync<Dictionary<string, string>>(httpClient.BaseAddress);
-                }
+                    values = await Requesting.AutorizationRequest<Dictionary<string, string>>(
+                        new Uri($"https://{IPaddress.IPAddress}/getformDate:{id}"),
+                        jsr);
             }
             catch (Exception ex)
             {
@@ -59,22 +58,20 @@ namespace GPO_BLAZOR.Client.Class.Date
 
             try
             {
-                using (HttpClient httpClient = new HttpClient())
+                var addId = (Statmen statmen, string id) =>
                 {
-                    httpClient.BaseAddress = new Uri($"https://{IPaddress.IPAddress}/getTepmlate/{values["Template"]}");
+                    statmen.Id = id;
+                    return statmen;
+                };
 
-                    var addId = (Statmen statmen, string id) =>
-                    {
-                        statmen.Id = id;
-                        return statmen;
-                    };
+                IStatmen StatmenTemplate = addId(await Requesting.AutorizationRequest<Statmen>(
+                    new Uri($"https://{IPaddress.IPAddress}/getTepmlate/{values["Template"]}"),
+                    jsr), id);
 
-                    IStatmen StatmenTemplate = addId(await httpClient.GetFromJsonAsync<Statmen>(httpClient.BaseAddress), id);
+                var t = FillTemplate(values, StatmenTemplate);
 
-                    var t = FillTemplate(values, StatmenTemplate);
-
-                    return t;
-                }
+                return t;
+                
             }
             catch (Exception ex)
             {
@@ -105,6 +102,7 @@ namespace GPO_BLAZOR.Client.Class.Date
         {
             using HttpClient httpClient = new HttpClient();
             httpClient.BaseAddress = new Uri($"https://{IPaddress.IPAddress}/getInfo");
+
             Dictionary<string, string> temp = new Dictionary<string, string>();
             foreach (var item in GetValues())
             {
@@ -114,7 +112,6 @@ namespace GPO_BLAZOR.Client.Class.Date
             var response = await httpClient.PostAsJsonAsync(httpClient.BaseAddress, temp);
 
             //var a = (httpClient.Send(new HttpRequestMessage())).Content.ReadAsStream();
-
 
             return await response.Content.ReadAsStringAsync();
         }

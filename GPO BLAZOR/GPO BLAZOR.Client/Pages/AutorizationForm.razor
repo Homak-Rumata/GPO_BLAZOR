@@ -12,42 +12,6 @@
 
 <div class="body">
 
-    <script>
-        window.WriteCookie = {
-
-            WriteCookie: function (name, value, days) {
-
-                var expires;
-                if (days) {
-                    var date = new Date();
-                    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-                    expires = "; expires=" + date.toGMTString();
-                }
-                else {
-                    expires = "";
-                }
-                document.cookie = name + "=" + value + expires + "; path=/";
-            }
-        }
-        window.ReadCookie = {
-            ReadCookie: function (cname) {
-                var name = cname + "=";
-                var decodedCookie = decodeURIComponent(document.cookie);
-                var ca = decodedCookie.split(';');
-                for (var i = 0; i < ca.length; i++) {
-                    var c = ca[i];
-                    while (c.charAt(0) == ' ') {
-                        c = c.substring(1);
-                    }
-                    if (c.indexOf(name) == 0) {
-                        return c.substring(name.length, c.length);
-                    }
-                }
-                return "";
-            }
-        }
-    </script>
-
     @if (isLoading) {
         <h1>
             Загрузка
@@ -72,12 +36,12 @@
             <h3> 
             Логин (e-mail) 
         </h3>
-        <input type="email" class="DateInput" @bind="AuthorizationInterface.Name"/>
+        <input type="email" class="DateInput" @bind-value="AuthorizationInterface.Name"/>
 
         <h3>
             Пароль 
         </h3>
-        <input type="password" class="DateInput" @bind="AuthorizationInterface.Password" />
+        <input type="password" class="DateInput" @bind-value="AuthorizationInterface.Password"/>
 
         <input type="button" class="AgreeButton" value="Отправить" @onclick="async ()=>{await AuthorizationInterface.Send(value); await ButtonClicked();}"/>
 
