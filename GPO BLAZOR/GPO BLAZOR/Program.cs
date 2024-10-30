@@ -11,8 +11,6 @@ using System.Xml.Serialization;
 using System;
 using GPO_BLAZOR.DBAgents;
 using Microsoft.AspNetCore.Identity;
-using GPO_BLAZOR.DBAgents;
-using GPO_BLAZOR.DBAgents.DBModels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.OAuth;
 using Microsoft.IdentityModel.Tokens;
@@ -21,6 +19,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using GPO_BLAZOR.API_Functions;
+using DBAgent;
 
 namespace GPO_BLAZOR
 {

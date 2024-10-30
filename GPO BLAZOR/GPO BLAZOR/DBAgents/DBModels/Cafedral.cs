@@ -2,30 +2,32 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GPO_BLAZOR.DBAgents.DBModels;
+namespace DBAgent.Models;
 
 /// <summary>
-/// Таблица атрибутов кафедры
+/// Кафедра
 /// </summary>
 [Table("Кафедра")]
 public partial class Cafedral
 {
+    public int Id { get; set; }
     /// <summary>
-    /// ID
+    /// Название полное
     /// </summary>
-    public decimal Id { get; set; }
+    [Column("НазваниеПолное")]
+    public string FullName { get; set; } = null!;
     /// <summary>
-    /// Название
+    /// Название краткое
     /// </summary>
-    [Column("Название")]
-    public string Name { get; set; } = null!;
+    [Column("НазваниеКраткое")]
+    public string EncriptedName { get; set; } = null!;
     /// <summary>
-    /// Заведующий кафедры
+    /// Заведующий
     /// </summary>
     [Column("Заведующий")]
-    public decimal Leader { get; set; }
+    public int Leader { get; set; }
 
-    public virtual ICollection<Groups> Groups { get; set; } = new List<Groups>();
+    public virtual ICollection<Group> Groups { get; set; } = new List<Group>();
 
     public virtual User LeaderNavigation { get; set; } = null!;
 }

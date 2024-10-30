@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GPO_BLAZOR.DBAgents.DBModels;
+namespace DBAgent.Models;
 
 /// <summary>
 /// Направление
@@ -11,31 +11,27 @@ namespace GPO_BLAZOR.DBAgents.DBModels;
 public partial class Direction
 {
     /// <summary>
-    /// ID
-    /// </summary>
-    public decimal Id { get; set; }
-    /// <summary>
-    /// Код специальности
+    /// Код
     /// </summary>
     [Column("Код")]
-    public string Code { get; set; } = null!;
+    public int Code { get; set; }
     /// <summary>
-    /// Название специальности
+    /// Название
     /// </summary>
     [Column("Название")]
-    public string DirectionName { get; set; } = null!;
+    public string Name { get; set; } = null!;
     /// <summary>
-    /// Профиль подготовки
+    /// Профиль
     /// </summary>
     [Column("Профиль")]
-    public string DirectiinProfile { get; set; } = null!;
+    public string Profile { get; set; } = null!;
     /// <summary>
-    /// Руководитель по направлению
+    /// Руководитель
     /// </summary>
     [Column("Руководитель")]
-    public decimal? Leader { get; set; }
+    public int LeaderName { get; set; }
 
-    public virtual ICollection<Groups> Groups { get; set; } = new List<Groups>();
+    public virtual ICollection<Group> Groups { get; set; } = new List<Group>();
 
-    public virtual User? LeaderNavigation { get; set; }
+    public virtual User LeaderNavigation { get; set; } = null!;
 }

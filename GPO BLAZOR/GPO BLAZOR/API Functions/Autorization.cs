@@ -1,4 +1,5 @@
-﻿using GPO_BLAZOR.DBAgents;
+﻿using DBAgent;
+using GPO_BLAZOR.DBAgents;
 
 namespace GPO_BLAZOR.API_Functions
 {

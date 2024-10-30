@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace GPO_BLAZOR.DBAgents.DBModels;
+namespace DBAgent.Models;
 
 /// <summary>
 /// Роль
@@ -10,15 +10,13 @@ namespace GPO_BLAZOR.DBAgents.DBModels;
 [Table("Роль")]
 public partial class Role
 {
+    public int Id { get; set; }
+
     /// <summary>
-    /// ID
-    /// </summary>
-    public decimal Id { get; set; }
-    /// <summary>
-    /// Название роли
+    /// Название
     /// </summary>
     [Column("Название")]
-    public string RoleName { get; set; } = null!;
+    public string Name { get; set; } = null!;
 
     public virtual ICollection<User> Users { get; set; } = new List<User>();
 }

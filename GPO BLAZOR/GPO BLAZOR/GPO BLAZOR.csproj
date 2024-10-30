@@ -14,9 +14,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="PDFConstructor\FormTemplate\**" />
+    <Compile Remove="DBAgent\**" />
     <Compile Remove="wwwroot\Новая папка\**" />
+    <Content Remove="PDFConstructor\FormTemplate\**" />
+    <Content Remove="DBAgent\**" />
     <Content Remove="wwwroot\Новая папка\**" />
+    <EmbeddedResource Remove="PDFConstructor\FormTemplate\**" />
+    <EmbeddedResource Remove="DBAgent\**" />
     <EmbeddedResource Remove="wwwroot\Новая папка\**" />
+    <None Remove="PDFConstructor\FormTemplate\**" />
+    <None Remove="DBAgent\**" />
     <None Remove="wwwroot\Новая папка\**" />
   </ItemGroup>
 
@@ -43,7 +51,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="DBAgents\FormTemplate\" />
     <Folder Include="wwwroot\bootstrap\" />
   </ItemGroup>
 
