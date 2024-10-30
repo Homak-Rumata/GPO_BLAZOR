@@ -316,6 +316,8 @@ namespace GPO_BLAZOR
 
             app.MapGet("/GetAtributes", () => new string[] { "A", "Б", "В" });
 
+            app.Logger.LogDebug("DEBUGSTART:");
+
             ///API авторизации
             app.MapPost("/autorization", (Autorization.AutorizationDate date) =>
             {

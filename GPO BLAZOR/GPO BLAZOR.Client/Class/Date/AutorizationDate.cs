@@ -166,12 +166,13 @@ namespace GPO_BLAZOR.Client.Class.Date
                         await _writer("Autorization", newjwt);
 #if DEBUG
                         Console.WriteLine("GetNewJWT: " + newjwt);
+#endif
                     }
                     else
                     {
                         throw (new Exception("Invalid Status Code: "+tempresponce.StatusCode));
                     }
-#endif
+
                 }
             }
             catch (Exception ex)
